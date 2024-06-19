@@ -136,7 +136,7 @@ resource "yandex_iam_service_account" "sa-for-obj-storage" {
   name      = "sa-for-obj-storage"
 }
 
-# Assign the `storage.admin` role to the Data Proc service account to create storages and manage bucket ACLs
+# Assign the `storage.admin` role to the Data Proc service account to create storages and manage the bucket ACLs
 resource "yandex_resourcemanager_folder_iam_binding" "s3-editor" {
   folder_id = local.folder_id
   role      = "storage.admin"
