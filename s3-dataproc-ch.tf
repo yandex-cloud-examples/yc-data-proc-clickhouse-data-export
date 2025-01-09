@@ -162,7 +162,7 @@ resource "yandex_storage_bucket" "input-bucket" {
   bucket     = local.input-bucket
 
   depends_on = [
-    yandex_resourcemanager_folder_iam_binding.s3-editor
+    yandex_resourcemanager_folder_iam_binding.s3-admin
   ]
 
   grant {
@@ -179,7 +179,7 @@ resource "yandex_storage_bucket" "output-bucket" {
   bucket     = local.output-bucket
 
   depends_on = [
-    yandex_resourcemanager_folder_iam_binding.s3-editor
+    yandex_resourcemanager_folder_iam_binding.s3-admin
   ]
 
   grant {
