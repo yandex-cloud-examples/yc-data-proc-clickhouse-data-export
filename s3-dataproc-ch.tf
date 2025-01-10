@@ -75,6 +75,13 @@ resource "yandex_vpc_security_group" "dataproc-security-group" {
   }
 
   egress {
+    description    = "Allow access to NTP servers for time syncing"
+    protocol       = "UDP"
+    port           = 123
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
     description    = "Allow connections to the ClickHouse port from any IP address"
     protocol       = "TCP"
     port           = 8443
@@ -137,7 +144,7 @@ resource "yandex_iam_service_account" "sa-for-obj-storage" {
 }
 
 # Assign the `storage.admin` role to the Yandex Data Processing service account to create storages and manage the bucket ACLs
-resource "yandex_resourcemanager_folder_iam_binding" "s3-editor" {
+resource "yandex_resourcemanager_folder_iam_binding" "s3-admin" {
   folder_id = local.folder_id
   role      = "storage.admin"
   members   = ["serviceAccount:${yandex_iam_service_account.sa-for-obj-storage.id}"]
@@ -154,6 +161,10 @@ resource "yandex_storage_bucket" "input-bucket" {
   secret_key = yandex_iam_service_account_static_access_key.sa-static-key.secret_key
   bucket     = local.input-bucket
 
+  depends_on = [
+    yandex_resourcemanager_folder_iam_binding.s3-admin
+  ]
+
   grant {
     id          = yandex_iam_service_account.dataproc-sa.id
     type        = "CanonicalUser"
@@ -166,6 +177,10 @@ resource "yandex_storage_bucket" "output-bucket" {
   access_key = yandex_iam_service_account_static_access_key.sa-static-key.access_key
   secret_key = yandex_iam_service_account_static_access_key.sa-static-key.secret_key
   bucket     = local.output-bucket
+
+  depends_on = [
+    yandex_resourcemanager_folder_iam_binding.s3-admin
+  ]
 
   grant {
     id          = yandex_iam_service_account.dataproc-sa.id
