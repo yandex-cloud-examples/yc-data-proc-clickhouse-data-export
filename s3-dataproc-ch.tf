@@ -203,7 +203,7 @@ resource "yandex_dataproc_cluster" "dataproc-cluster" {
 
     hadoop {
       services        = ["HDFS", "SPARK", "YARN"]
-      ssh_public_keys = ["${file(local.dp_ssh_key)}"]
+      ssh_public_keys = [file(local.dp_ssh_key)]
     }
 
     subcluster_spec {
