@@ -191,6 +191,7 @@ resource "yandex_storage_bucket" "output-bucket" {
 
 resource "yandex_dataproc_cluster" "dataproc-cluster" {
   description        = "Yandex Data Processing cluster"
+  environment        = "PRODUCTION"
   depends_on         = [yandex_resourcemanager_folder_iam_binding.dataproc-agent,yandex_resourcemanager_folder_iam_binding.dataproc-provisioner]
   bucket             = yandex_storage_bucket.output-bucket.id
   name               = "dataproc-cluster"
