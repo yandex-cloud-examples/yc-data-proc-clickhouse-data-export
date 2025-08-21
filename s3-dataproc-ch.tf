@@ -164,6 +164,13 @@ resource "yandex_storage_bucket" "input-bucket" {
   depends_on = [
     yandex_resourcemanager_folder_iam_binding.s3-admin
   ]
+}
+
+resource "yandex_storage_bucket_grant" "input-bucket-grant" {
+  access_key = yandex_iam_service_account_static_access_key.sa-static-key.access_key
+  secret_key = yandex_iam_service_account_static_access_key.sa-static-key.secret_key
+
+  bucket = yandex_storage_bucket.input-bucket.bucket
 
   grant {
     id          = yandex_iam_service_account.dataproc-sa.id
@@ -181,6 +188,13 @@ resource "yandex_storage_bucket" "output-bucket" {
   depends_on = [
     yandex_resourcemanager_folder_iam_binding.s3-admin
   ]
+}
+
+resource "yandex_storage_bucket_grant" "output-bucket-grant" {
+  access_key = yandex_iam_service_account_static_access_key.sa-static-key.access_key
+  secret_key = yandex_iam_service_account_static_access_key.sa-static-key.secret_key
+
+  bucket = yandex_storage_bucket.output-bucket.bucket
 
   grant {
     id          = yandex_iam_service_account.dataproc-sa.id
@@ -255,15 +269,22 @@ resource "yandex_mdb_clickhouse_cluster" "mch-cluster" {
     assign_public_ip = true # Required for connection from the Internet
   }
 
-  database {
-    name = "db1"
+  lifecycle {
+    ignore_changes = [database, user,]
   }
+}
 
-  user {
-    name     = "user1"
-    password = local.ch_password
-    permission {
-      database_name = "db1"
-    }
+resource "yandex_mdb_clickhouse_database" "db1" {
+  cluster_id = yandex_mdb_clickhouse_cluster.mch-cluster.id
+  name       = "db1"
+}
+
+resource "yandex_mdb_clickhouse_user" "user1" {
+  cluster_id = yandex_mdb_clickhouse_cluster.mch-cluster.id
+  name       = "user1"
+  password   = local.ch_password
+
+  permission {
+    database_name = yandex_mdb_clickhouse_database.db1.name
   }
 }
